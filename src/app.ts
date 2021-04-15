@@ -7,10 +7,10 @@ interface ValidationData {
 
 const validations: ValidationData = {};
 
-function validator(target: string[]) {
+function validator(types: string[]) {
     return function (target: any, propName: string) {
         validations[target.constructor.name] = {
-            [propName] : types
+            [propName] : types,
         }
     }
 }
@@ -27,6 +27,27 @@ class Person {
     }
 }
 
+function validate(obj: any) {
+    const validationRegistered = validations[obj.constructor.name];
+    if (!validationRegistered) {
+        return true;
+    }
+    let isValid = true;
+    for (const prop in validationRegistered) {
+        for (const validator of validationRegistered[prop]) {
+            switch (validator) {
+                case 'required':
+                    isValid = isValid && !!obj[prop];
+                    break;
+                case 'password':
+                    isValid = isValid && obj[prop].length > 5;
+                    break;
+            }
+        }
+    }
+    return isValid;
+}
+
 const personForm = document.querySelector('form');
 personForm?.addEventListener('submit', event => {
     event.preventDefault();
@@ -35,5 +56,9 @@ personForm?.addEventListener('submit', event => {
 
     const newPerson = new Person(emailElem.value, passwordElem.value);
 
+    if (!validate(newPerson)) {
+        alert('El dato ingresado es incorrecto');
+        return
+    }
     console.log(newPerson)
 });

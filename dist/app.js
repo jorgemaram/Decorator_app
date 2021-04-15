@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 var validations = {};
-function validator(target) {
+function validator(types) {
     return function (target, propName) {
         var _a;
         validations[target.constructor.name] = (_a = {},
@@ -27,11 +27,36 @@ var Person = /** @class */ (function () {
     ], Person.prototype, "password", void 0);
     return Person;
 }());
+function validate(obj) {
+    var validationRegistered = validations[obj.constructor.name];
+    if (!validationRegistered) {
+        return true;
+    }
+    var isValid = true;
+    for (var prop in validationRegistered) {
+        for (var _i = 0, _a = validationRegistered[prop]; _i < _a.length; _i++) {
+            var validator_1 = _a[_i];
+            switch (validator_1) {
+                case 'required':
+                    isValid = isValid && !!obj[prop];
+                    break;
+                case 'password':
+                    isValid = isValid && obj[prop].length > 5;
+                    break;
+            }
+        }
+    }
+    return isValid;
+}
 var personForm = document.querySelector('form');
 personForm === null || personForm === void 0 ? void 0 : personForm.addEventListener('submit', function (event) {
     event.preventDefault();
     var emailElem = document.getElementById('email');
     var passwordElem = document.getElementById('password');
     var newPerson = new Person(emailElem.value, passwordElem.value);
+    if (!validate(newPerson)) {
+        alert('El dato ingresado es incorrecto');
+        return;
+    }
     console.log(newPerson);
 });
