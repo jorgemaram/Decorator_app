@@ -1,5 +1,24 @@
-class Person{
+
+interface ValidationData {
+    [className: string]: {
+        [propName: string]: string[]; //['required', 'password']
+    }
+}
+
+const validations: ValidationData = {};
+
+function validator(target: string[]) {
+    return function (target: any, propName: string) {
+        validations[target.constructor.name] = {
+            [propName] : types
+        }
+    }
+}
+
+class Person {
+    @validator(['required'])
     email: string;
+    @validator(['required', 'password'])
     password: string;
 
     constructor(email: string, password: string) {
